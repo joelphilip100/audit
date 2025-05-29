@@ -14,5 +14,3 @@ class Employee(Base):
     @property
     def team_name(self):
         return self.team.team_name if self.team else None
-    
-    
