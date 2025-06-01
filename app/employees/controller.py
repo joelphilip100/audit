@@ -7,8 +7,9 @@ from starlette import status
 
 router = APIRouter(
     prefix="/employees",
-    tags = ["employees"]
+    tags=["employees"]
 )
+
 
 # Create employee
 @router.post("/", response_model=employee_schema.EmployeeResponse, status_code=status.HTTP_201_CREATED)
@@ -18,17 +19,20 @@ async def create_employee(employee_request: employee_schema.EmployeeCreateReques
     logger.info(f"Employee created with GPN: {new_employee.gpn}")
     return new_employee
 
+
 # Get all employees
 @router.get("/", response_model=list[employee_schema.EmployeeResponse])
 async def get_all_employees(db: Session = Depends(get_db)):
     logger.info("Fetching all employees")
     return services.get_all_employees(db)
 
+
 # Get employee by GPN
 @router.get("/{gpn}", response_model=employee_schema.EmployeeResponse)
 async def get_employee(gpn: str, db: Session = Depends(get_db)):
     logger.info(f"Fetching employee with GPN: {gpn}")
     return services.get_employee_by_gpn(gpn, db)
+
 
 # Update employee
 @router.put("/{gpn}", response_model=employee_schema.EmployeeResponse)
@@ -37,6 +41,7 @@ async def update_employee(gpn: str, updated_data: employee_schema.EmployeeUpdate
     employee = services.update_employee(gpn, updated_data, db)
     logger.info(f"Employee with GPN {gpn} updated successfully")
     return employee
+
 
 # Delete employee
 @router.delete("/{gpn}")

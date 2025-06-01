@@ -1,9 +1,11 @@
 from pydantic import BaseModel
 
+
 class EmployeeCreateRequest(BaseModel):
     gpn: str
     employee_name: str
     team_name: str | None
+
 
 class EmployeeUpdateRequest(BaseModel):
     gpn: str
