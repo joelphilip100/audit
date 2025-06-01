@@ -1,4 +1,4 @@
-from typing import List, Type
+from typing import Type
 
 from sqlalchemy.orm import Session
 from app.employees import models as employee_models, schemas as employee_schema, repository
