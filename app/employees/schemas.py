@@ -7,10 +7,10 @@ class EmployeeBase(BaseModel):
     team_name: str | None = Field(None, min_length=2, max_length=20)
 
     # noinspection PyNestedDecorators
-    @field_validator("gpn")
+    @field_validator("gpn", "team_name")
     @classmethod
     def gpn_is_uppercase(cls, value: str) -> str:
-        return value.upper()
+        return value.upper() if value else value
 
     # noinspection PyNestedDecorators
     @field_validator("gpn", "employee_name", "team_name")

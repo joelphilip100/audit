@@ -162,11 +162,11 @@ def test_update_employee_without_changes(test_db):
     assert updated_employee.gpn == "GPN105"
     assert updated_employee.employee_name == "Thomas Valentine"
     assert updated_employee.team_id == team.team_id
-    assert updated_employee.team_name == "team_5"
+    assert updated_employee.team_name == "TEAM_5"
 
 
 def test_update_employee_with_existing_gpn(test_db):
-    employee1_details = employee_helper.create_test_employee("GPN106", "Christy James", "team_6", test_db)
+    employee_helper.create_test_employee("GPN106", "Christy James", "team_6", test_db)
     employee2_details = employee_helper.create_test_employee("GPN107", "Albert Smith", "team_7", test_db)
     employee2 = employee2_details[0]
 

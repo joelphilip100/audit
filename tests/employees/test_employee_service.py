@@ -74,9 +74,9 @@ def test_create_employee_with_invalid_team_name(test_db):
 
 
 def test_get_all_employees(test_db):
-    employee_helper.create_test_employee("GPN_RES1", "Alice Smith", "team_res1", test_db)
-    employee_helper.create_test_employee("GPN_RES2", "Bob Johnson", "team_res2", test_db)
-    employee_helper.create_test_employee("GPN_RES3", "Charlie Brown", "team_res3", test_db)
+    employee_helper.create_test_employee("GPN_RES1", "Alice Smith", "TEAM_RES1", test_db)
+    employee_helper.create_test_employee("GPN_RES2", "Bob Johnson", "TEAM_RES2", test_db)
+    employee_helper.create_test_employee("GPN_RES3", "Charlie Brown", "TEAM_RES3", test_db)
 
     employees = employee_services.get_all_employees(test_db)
 
@@ -86,7 +86,7 @@ def test_get_all_employees(test_db):
 
 
 def test_get_employee_by_gpn(test_db):
-    created_employee, team = employee_helper.create_test_employee("GPN_RES4", "Alice Smith", "team_res4", test_db)
+    created_employee, team = employee_helper.create_test_employee("GPN_RES4", "Alice Smith", "TEAM_RES4", test_db)
 
     employee = employee_services.get_employee_by_gpn("GPN_RES4", test_db)
 
@@ -107,7 +107,7 @@ def test_get_employee_by_gpn_not_found(test_db):
 
 def test_update_employee(test_db):
     gpn = "GPN_UES1"
-    created_employee, team = employee_helper.create_test_employee(gpn, "Alice Smith", "team_ues1", test_db)
+    created_employee, team = employee_helper.create_test_employee(gpn, "Alice Smith", "TEAM_UES1", test_db)
     employee_request = employee_schema.EmployeeUpdateRequest(
         gpn=gpn,
         employee_name="John Smith",
@@ -123,7 +123,7 @@ def test_update_employee(test_db):
 
 def test_update_employee_no_changes(test_db):
     gpn = "GPN_UES2"
-    created_employee, team = employee_helper.create_test_employee(gpn, "Alice Smith", "team_ues2", test_db)
+    created_employee, team = employee_helper.create_test_employee(gpn, "Alice Smith", "TEAM_UES2", test_db)
     employee_request = employee_schema.EmployeeUpdateRequest(
         gpn=gpn,
         employee_name="Alice Smith",
@@ -139,7 +139,7 @@ def test_update_employee_no_changes(test_db):
 
 def test_update_employee_with_gpn_not_found(test_db):
     invalid_gpn = "10000"
-    team = employee_helper.create_test_team("team_ues3", test_db)
+    team = employee_helper.create_test_team("TEAM_UES3", test_db)
 
     employee_request = employee_schema.EmployeeUpdateRequest(
         gpn=invalid_gpn,
@@ -155,7 +155,7 @@ def test_update_employee_with_gpn_not_found(test_db):
 
 def test_update_employee_with_different_gpn_valid(test_db):
     gpn = "GPN_UES4"
-    created_employee, team = employee_helper.create_test_employee(gpn, "Alice Smith", "team_ues4", test_db)
+    created_employee, team = employee_helper.create_test_employee(gpn, "Alice Smith", "TEAM_UES4", test_db)
     employee_request = employee_schema.EmployeeUpdateRequest(
         gpn="GPN_UES4_NEW",
         employee_name="Alice Smith",
@@ -170,8 +170,8 @@ def test_update_employee_with_different_gpn_valid(test_db):
 
 
 def test_update_employee_with_existing_gpn(test_db):
-    employee1, team1 = employee_helper.create_test_employee("GPN_UES5", "Alice Smith", "team_ues5", test_db)
-    employee2, team2 = employee_helper.create_test_employee("GPN_UES6", "George Smith", "team_ues6", test_db)
+    employee1, team1 = employee_helper.create_test_employee("GPN_UES5", "Alice Smith", "TEAM_UES5", test_db)
+    employee2, team2 = employee_helper.create_test_employee("GPN_UES6", "George Smith", "TEAM_UES6", test_db)
 
     new_gpn_to_update = employee1.gpn
     # Update employee2 with employee1 gpn
@@ -189,7 +189,7 @@ def test_update_employee_with_existing_gpn(test_db):
 
 def test_update_employee_with_invalid_team_name(test_db):
     gpn = "GPN_UES7"
-    employee_helper.create_test_employee(gpn, "Alice Smith", "team_ues7", test_db)
+    employee_helper.create_test_employee(gpn, "Alice Smith", "TEAM_UES7", test_db)
     employee_request = employee_schema.EmployeeUpdateRequest(
         gpn=gpn,
         employee_name="Alice Smith",
@@ -204,7 +204,7 @@ def test_update_employee_with_invalid_team_name(test_db):
 
 def test_update_employee_with_team_name_none(test_db):
     gpn = "GPN_UES8"
-    employee_helper.create_test_employee(gpn, "Alice Smith", "team_ues8", test_db)
+    employee_helper.create_test_employee(gpn, "Alice Smith", "TEAM_UES8", test_db)
     employee_request = employee_schema.EmployeeUpdateRequest(
         gpn=gpn,
         employee_name="Alice Smith"
@@ -219,7 +219,7 @@ def test_update_employee_with_team_name_none(test_db):
 
 def test_delete_employee(test_db):
     gpn = "GPN_DES1"
-    employee_helper.create_test_employee(gpn, "Alice Smith", "team_des1", test_db)
+    employee_helper.create_test_employee(gpn, "Alice Smith", "TEAM_DES1", test_db)
 
     employee_services.delete_employee(gpn, test_db)
 
@@ -238,12 +238,13 @@ def test_delete_employee_not_found(test_db):
 
 def test_recreate_employee_after_deletion(test_db):
     gpn = "GPN_DES3"
-    employee_helper.create_test_team("team_des3", test_db)
+    team_name = "TEAM_DES3"
+    employee_helper.create_test_team(team_name, test_db)
     employee_services.create_employee(
-        employee_schema.EmployeeCreateRequest(gpn=gpn, employee_name="Alice Smith", team_name="team_des3"), test_db)
+        employee_schema.EmployeeCreateRequest(gpn=gpn, employee_name="Alice Smith", team_name=team_name), test_db)
     employee_services.delete_employee(gpn, test_db)
     employee_services.create_employee(
-        employee_schema.EmployeeCreateRequest(gpn=gpn, employee_name="Alice Smith", team_name="team_des3"), test_db)
+        employee_schema.EmployeeCreateRequest(gpn=gpn, employee_name="Alice Smith", team_name=team_name), test_db)
 
     employee = employee_services.get_employee_by_gpn(gpn, test_db)
 
@@ -256,7 +257,7 @@ def test_gpn_is_converted_to_uppercase(schemas):
     request = schemas(
         gpn="gpn123",
         employee_name="Alice Smith",
-        team_name="team_one"
+        team_name="TEAM_ONE"
     )
 
     assert request.gpn == "GPN123"
@@ -276,9 +277,9 @@ def test_employee_name_title_case_conversion(schemas):
 @pytest.mark.parametrize(
     "field_name, data, expected_message",
     [
-        ("employee_name", {"gpn": "GPN_MISS", "team_name": "team2"},
+        ("employee_name", {"gpn": "GPN_MISS", "team_name": "TEAM2"},
          "1 validation error for EmployeeCreateRequest\nemployee_name"),
-        ("gpn", {"employee_name": "Alice", "team_name": "team_abc"},
+        ("gpn", {"employee_name": "Alice", "team_name": "TEAM3"},
          "1 validation error for EmployeeCreateRequest\ngpn")
     ]
 )
@@ -296,7 +297,7 @@ def test_create_request_without_fields(field_name, data, expected_message):
     [
         ("employee_name", {"gpn": "GPN_MISS", "team_name": "team2"},
          "1 validation error for EmployeeUpdateRequest\nemployee_name"),
-        ("gpn", {"employee_name": "Alice", "team_name": "team_abc"},
+        ("gpn", {"employee_name": "Alice", "team_name": "TEAM_ABC"},
          "1 validation error for EmployeeUpdateRequest\ngpn")
     ]
 )
@@ -315,11 +316,11 @@ def test_create_request_without_fields(field_name, data, expected_message):
     [
         ("gpn", {"gpn": "a", "employee_name": "Alice"}, "String should have at least 2 characters"),
         ("gpn", {"gpn": "a" * 16, "employee_name": "Alice"}, "String should have at most 15 characters"),
-        ("employee_name", {"gpn": "GPN1", "employee_name": "a"}, "String should have at least 2 characters"),
-        ("employee_name", {"gpn": "GPN2", "employee_name": "a" * 51}, "String should have at most 50 characters"),
-        ("team_name", {"gpn": "GPN3", "employee_name": "Alice", "team_name": "a"},
+        ("employee_name", {"gpn": "GPN1", "employee_name": "A"}, "String should have at least 2 characters"),
+        ("employee_name", {"gpn": "GPN2", "employee_name": "A" * 51}, "String should have at most 50 characters"),
+        ("team_name", {"gpn": "GPN3", "employee_name": "Alice", "team_name": "A"},
          "String should have at least 2 characters"),
-        ("team_name", {"gpn": "GPN4", "employee_name": "Alice", "team_name": "a" * 21},
+        ("team_name", {"gpn": "GPN4", "employee_name": "Alice", "team_name": "A" * 21},
          "String should have at most 20 characters"),
     ]
 )
@@ -334,8 +335,8 @@ def test_create_update_request_field_length_validation(schemas, field_name, data
 @pytest.mark.parametrize(
     "gpn_input, employee_name_input, team_name_input, expected_gpn, expected_name, expected_team",
     [
-        ("  GPN123  ", " Alice ", " Dev Team ", "GPN123", "Alice", "Dev Team"),
-        ("\tGPN999", "Bob\t", "\nTeamX\n", "GPN999", "Bob", "TeamX"),
+        ("  GPN123  ", " Alice ", " Dev Team ", "GPN123", "Alice", "DEV TEAM"),
+        ("\tGPN999", "Bob\t", "\nTEAMX\n", "GPN999", "Bob", "TEAMX"),
         ("GPN1", "Alice Smith", None, "GPN1", "Alice Smith", None),
     ]
 )

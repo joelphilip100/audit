@@ -5,7 +5,7 @@ def test_get_all_employees_returns_empty_list(client):
 
 
 def test_get_all_employees_returns_list_of_employees(client):
-    team_name = "team_rec1"
+    team_name = "TEAM_REC1"
     client.post("/teams/", json={"team_name": team_name})
     client.post("/employees/", json={"gpn": "GPN_REC1", "employee_name": "John Doe", "team_name": team_name})
     client.post("/employees/", json={"gpn": "GPN_REC2", "employee_name": "Davis Smith", "team_name": team_name})
@@ -21,7 +21,7 @@ def test_get_all_employees_returns_list_of_employees(client):
 
 
 def test_get_employee_by_gpn_returns_employee(client):
-    team_name = "team_rec2"
+    team_name = "TEAM_REC2"
     client.post("/teams/", json={"team_name": team_name})
     client.post("/employees/", json={"gpn": "GPN_REC3", "employee_name": "John Doe", "team_name": team_name})
     response = client.get("/employees/GPN_REC3")
@@ -38,7 +38,7 @@ def test_get_employee_invalid_gpn(client):
 
 
 def test_create_employee(client):
-    team_name = "team_cec1"
+    team_name = "TEAM_CEC1"
     client.post("/teams/", json={"team_name": team_name})
     response = client.post("/employees/", json={"gpn": "GPN_CEC1", "employee_name": "John Doe", "team_name": team_name})
     assert response.status_code == 201
@@ -49,7 +49,7 @@ def test_create_employee(client):
 
 
 def test_create_employee_when_gpn_already_exists(client):
-    team_name = "team_cec2"
+    team_name = "TEAM_CEC2"
     client.post("/teams/", json={"team_name": team_name})
     client.post("/employees/", json={"gpn": "GPN_CEC2", "employee_name": "John Doe", "team_name": team_name})
     response = client.post("/employees/", json={"gpn": "GPN_CEC2", "employee_name": "Davis Smith", "team_name": team_name})
@@ -71,17 +71,17 @@ def test_create_employee_when_team_name_not_provided(client):
 
 
 def test_create_employee_gpn_not_provided(client):
-    response = client.post("/employees/", json={"team_name": "team_cec5", "employee_name": "John Doe"})
+    response = client.post("/employees/", json={"team_name": "TEAM_CEC5", "employee_name": "John Doe"})
     assert response.status_code == 422
 
 
 def test_create_employee_employee_name_not_provided(client):
-    response = client.post("/employees/", json={"gpn": "GPN_CEC6", "team_name": "team_cec6"})
+    response = client.post("/employees/", json={"gpn": "GPN_CEC6", "team_name": "TEAM_CEC6"})
     assert response.status_code == 422
 
 
 def test_update_employee(client):
-    team_name = "team_uec1"
+    team_name = "TEAM_UEC1"
     client.post("/teams/", json={"team_name": team_name})
     client.post("/employees/", json={"gpn": "GPN_UEC1", "employee_name": "Alice Smith", "team_name": team_name})
     response = client.put("/employees/GPN_UEC1", json={"gpn": "GPN_UEC1", "employee_name": "John Doe", "team_name": team_name})
@@ -113,7 +113,7 @@ def test_update_employee_when_team_name_not_provided(client):
 
 
 def test_update_employee_gpn_valid(client):
-    team_name = "team_uec4"
+    team_name = "TEAM_UEC4"
     client.post("/teams/", json={"team_name": team_name})
     client.post("/employees/", json={"gpn": "GPN_UEC4", "employee_name": "Alice Smith", "team_name": team_name})
     response = client.put("/employees/GPN_UEC4", json={"gpn": "GPN_UEC5", "employee_name": "John Doe", "team_name": team_name})
@@ -125,7 +125,7 @@ def test_update_employee_gpn_valid(client):
 
 
 def test_update_employee_gpn_already_exists(client):
-    team_name = "team_uec6"
+    team_name = "TEAM_UEC6"
     client.post("/teams/", json={"team_name": team_name})
     client.post("/employees/", json={"gpn": "GPN_UEC6", "employee_name": "Alice Smith", "team_name": team_name})
     client.post("/employees/", json={"gpn": "GPN_UEC7", "employee_name": "John Doe", "team_name": team_name})
@@ -144,7 +144,7 @@ def test_update_employee_employee_name_not_provided(client):
 
 
 def test_delete_employee(client):
-    team_name = "team_ded1"
+    team_name = "TEAM_DED1"
     client.post("/teams/", json={"team_name": team_name})
     client.post("/employees/", json={"gpn": "GPN_DED1", "employee_name": "John Doe", "team_name": team_name})
     response = client.delete("/employees/GPN_DED1")

@@ -3,7 +3,7 @@ from app.employees import models as employee_models
 
 
 def create_test_team(team_name, test_db) -> team_models.Team:
-    team = team_models.Team(team_name=team_name)
+    team = team_models.Team(team_name=team_name.upper())
     test_db.add(team)
     test_db.commit()
     test_db.refresh(team)
