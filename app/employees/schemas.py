@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field, field_validator
 class EmployeeBase(BaseModel):
     gpn: str = Field(..., min_length=2, max_length=15)
     employee_name: str = Field(..., min_length=2, max_length=50)
-    team_name: str | None = Field(None, min_length=2, max_length=15)
+    team_name: str | None = Field(None, min_length=2, max_length=20)
 
     # noinspection PyNestedDecorators
     @field_validator("gpn")

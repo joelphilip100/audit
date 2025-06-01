@@ -319,8 +319,8 @@ def test_create_request_without_fields(field_name, data, expected_message):
         ("employee_name", {"gpn": "GPN2", "employee_name": "a" * 51}, "String should have at most 50 characters"),
         ("team_name", {"gpn": "GPN3", "employee_name": "Alice", "team_name": "a"},
          "String should have at least 2 characters"),
-        ("team_name", {"gpn": "GPN4", "employee_name": "Alice", "team_name": "a" * 16},
-         "String should have at most 15 characters"),
+        ("team_name", {"gpn": "GPN4", "employee_name": "Alice", "team_name": "a" * 21},
+         "String should have at most 20 characters"),
     ]
 )
 def test_create_update_request_field_length_validation(schemas, field_name, data, expected_message):
