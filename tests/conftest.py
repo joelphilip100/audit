@@ -25,7 +25,7 @@ TEST_DATABASE_PATH = db_path.resolve()
 TEST_DATABASE_URL = f"sqlite:///{TEST_DATABASE_PATH}"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def test_engine():
     """Create test database engine - in-memory by default, file-based if specified"""
     if USE_PERSISTENT_TEST_DB:
