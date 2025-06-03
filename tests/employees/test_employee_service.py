@@ -1,5 +1,6 @@
 import pytest
 from pydantic import ValidationError
+from sqlalchemy.exc import IntegrityError
 
 from app.employees import services as employee_services
 from app.employees import schemas as employee_schema
@@ -20,7 +21,7 @@ def test_create_employee(test_db):
     employee_request = employee_schema.EmployeeCreateRequest(
         gpn="GPN_CES1",
         employee_name="Alice Smith",
-        team_name=team.team_name
+        team_id=team.team_id
     )
 
     new_employee = employee_services.create_employee(employee_request, test_db)
@@ -50,7 +51,7 @@ def test_create_employee_with_duplicate_gpn(test_db):
     employee_request = employee_schema.EmployeeCreateRequest(
         gpn="GPN_CES3",
         employee_name="Alice Smith",
-        team_name=team.team_name
+        team_id=team.team_id
     )
 
     with pytest.raises(EmployeeGpnExistsException) as exc_info:
@@ -59,18 +60,17 @@ def test_create_employee_with_duplicate_gpn(test_db):
     assert f"GPN {gpn} already exists" in str(exc_info.value)
 
 
-def test_create_employee_with_invalid_team_name(test_db):
-    team_name = "team_ces4"
+def test_create_employee_with_invalid_team_id(test_db):
     employee_request = employee_schema.EmployeeCreateRequest(
         gpn="GPN_CES4",
         employee_name="Alice Smith",
-        team_name=team_name
+        team_id=100000
     )
 
-    with pytest.raises(TeamNotFoundException) as exc_info:
+    with pytest.raises(IntegrityError) as exc_info:
         employee_services.create_employee(employee_request, test_db)
 
-    assert f"Team not found" in str(exc_info.value)
+    assert "FOREIGN KEY constraint failed" in str(exc_info.value)
 
 
 def test_get_all_employees(test_db):
@@ -111,7 +111,7 @@ def test_update_employee(test_db):
     employee_request = employee_schema.EmployeeUpdateRequest(
         gpn=gpn,
         employee_name="John Smith",
-        team_name=team.team_name
+        team_id=team.team_id
     )
 
     updated_employee = employee_services.update_employee(gpn, employee_request, test_db)
@@ -127,7 +127,7 @@ def test_update_employee_no_changes(test_db):
     employee_request = employee_schema.EmployeeUpdateRequest(
         gpn=gpn,
         employee_name="Alice Smith",
-        team_name=team.team_name
+        team_id=team.team_id
     )
 
     updated_employee = employee_services.update_employee(gpn, employee_request, test_db)
@@ -144,7 +144,7 @@ def test_update_employee_with_gpn_not_found(test_db):
     employee_request = employee_schema.EmployeeUpdateRequest(
         gpn=invalid_gpn,
         employee_name="Alice Smith",
-        team_name=team.team_name
+        team_id=team.team_id
     )
 
     with pytest.raises(EmployeeNotFoundException) as exc_info:
@@ -159,7 +159,7 @@ def test_update_employee_with_different_gpn_valid(test_db):
     employee_request = employee_schema.EmployeeUpdateRequest(
         gpn="GPN_UES4_NEW",
         employee_name="Alice Smith",
-        team_name=team.team_name
+        team_id=team.team_id
     )
 
     updated_employee = employee_services.update_employee(gpn, employee_request, test_db)
@@ -178,7 +178,7 @@ def test_update_employee_with_existing_gpn(test_db):
     employee_request = employee_schema.EmployeeUpdateRequest(
         gpn=new_gpn_to_update,
         employee_name="George Smith",
-        team_name=team2.team_name
+        team_id=team2.team_id
     )
 
     with pytest.raises(EmployeeGpnExistsException) as exc_info:
@@ -193,13 +193,13 @@ def test_update_employee_with_invalid_team_name(test_db):
     employee_request = employee_schema.EmployeeUpdateRequest(
         gpn=gpn,
         employee_name="Alice Smith",
-        team_name="team_invalid"
+        team_id=100000
     )
 
-    with pytest.raises(TeamNotFoundException) as exc_info:
+    with pytest.raises(IntegrityError) as exc_info:
         employee_services.update_employee(gpn, employee_request, test_db)
 
-    assert f"Team not found" in str(exc_info.value)
+    assert "FOREIGN KEY constraint failed" in str(exc_info.value)
 
 
 def test_update_employee_with_team_name_none(test_db):
@@ -239,12 +239,12 @@ def test_delete_employee_not_found(test_db):
 def test_recreate_employee_after_deletion(test_db):
     gpn = "GPN_DES3"
     team_name = "TEAM_DES3"
-    employee_helper.create_test_team(team_name, test_db)
+    team = employee_helper.create_test_team(team_name, test_db)
     employee_services.create_employee(
-        employee_schema.EmployeeCreateRequest(gpn=gpn, employee_name="Alice Smith", team_name=team_name), test_db)
+        employee_schema.EmployeeCreateRequest(gpn=gpn, employee_name="Alice Smith", team_id=team.team_id), test_db)
     employee_services.delete_employee(gpn, test_db)
     employee_services.create_employee(
-        employee_schema.EmployeeCreateRequest(gpn=gpn, employee_name="Alice Smith", team_name=team_name), test_db)
+        employee_schema.EmployeeCreateRequest(gpn=gpn, employee_name="Alice Smith", team_id=team.team_id), test_db)
 
     employee = employee_services.get_employee_by_gpn(gpn, test_db)
 
@@ -257,7 +257,7 @@ def test_gpn_is_converted_to_uppercase(schemas):
     request = schemas(
         gpn="gpn123",
         employee_name="Alice Smith",
-        team_name="TEAM_ONE"
+        team_id=1
     )
 
     assert request.gpn == "GPN123"
@@ -277,9 +277,9 @@ def test_employee_name_title_case_conversion(schemas):
 @pytest.mark.parametrize(
     "field_name, data, expected_message",
     [
-        ("employee_name", {"gpn": "GPN_MISS", "team_name": "TEAM2"},
+        ("employee_name", {"gpn": "GPN_MISS", "team_id": 1},
          "1 validation error for EmployeeCreateRequest\nemployee_name"),
-        ("gpn", {"employee_name": "Alice", "team_name": "TEAM3"},
+        ("gpn", {"employee_name": "Alice", "team_id": 1},
          "1 validation error for EmployeeCreateRequest\ngpn")
     ]
 )
@@ -295,9 +295,9 @@ def test_create_request_without_fields(field_name, data, expected_message):
 @pytest.mark.parametrize(
     "field_name, data, expected_message",
     [
-        ("employee_name", {"gpn": "GPN_MISS", "team_name": "team2"},
+        ("employee_name", {"gpn": "GPN_MISS", "team_id": 1},
          "1 validation error for EmployeeUpdateRequest\nemployee_name"),
-        ("gpn", {"employee_name": "Alice", "team_name": "TEAM_ABC"},
+        ("gpn", {"employee_name": "Alice", "team_id": 1},
          "1 validation error for EmployeeUpdateRequest\ngpn")
     ]
 )
@@ -318,10 +318,6 @@ def test_create_request_without_fields(field_name, data, expected_message):
         ("gpn", {"gpn": "a" * 16, "employee_name": "Alice"}, "String should have at most 15 characters"),
         ("employee_name", {"gpn": "GPN1", "employee_name": "A"}, "String should have at least 2 characters"),
         ("employee_name", {"gpn": "GPN2", "employee_name": "A" * 51}, "String should have at most 50 characters"),
-        ("team_name", {"gpn": "GPN3", "employee_name": "Alice", "team_name": "A"},
-         "String should have at least 2 characters"),
-        ("team_name", {"gpn": "GPN4", "employee_name": "Alice", "team_name": "A" * 21},
-         "String should have at most 20 characters"),
     ]
 )
 def test_create_update_request_field_length_validation(schemas, field_name, data, expected_message):
@@ -333,21 +329,21 @@ def test_create_update_request_field_length_validation(schemas, field_name, data
 
 @pytest.mark.parametrize("schemas", SCHEMAS)
 @pytest.mark.parametrize(
-    "gpn_input, employee_name_input, team_name_input, expected_gpn, expected_name, expected_team",
+    "gpn_input, employee_name_input, expected_gpn, expected_name",
     [
-        ("  GPN123  ", " Alice ", " Dev Team ", "GPN123", "Alice", "DEV TEAM"),
-        ("\tGPN999", "Bob\t", "\nTEAMX\n", "GPN999", "Bob", "TEAMX"),
-        ("GPN1", "Alice Smith", None, "GPN1", "Alice Smith", None),
+        ("  GPN123  ", " Alice ", "GPN123", "Alice"),
+        ("\tGPN999", "Bob\t", "GPN999", "Bob"),
+        ("GPN1", "Alice Smith", "GPN1", "Alice Smith"),
     ]
 )
-def test_create_update_request_strip_whitespace_on_fields(schemas, gpn_input, employee_name_input, team_name_input,
-                                                          expected_gpn, expected_name, expected_team):
+def test_create_update_request_strip_whitespace_on_fields(schemas, gpn_input, employee_name_input,
+                                                          expected_gpn, expected_name):
     employee = schemas(
         gpn=gpn_input,
         employee_name=employee_name_input,
-        team_name=team_name_input
+        team_id=1
     )
 
     assert employee.gpn == expected_gpn
     assert employee.employee_name == expected_name
-    assert employee.team_name == expected_team
+    assert employee.team_id == 1
