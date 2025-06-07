@@ -16,7 +16,7 @@ def create_employee(employee_request: employee_schema.EmployeeCreateRequest, db:
         employee_name=employee_request.employee_name,
         team_id=employee_request.team_id
     )
-    return employee_repo.create(db, new_employee)
+    return employee_repo.create(new_employee, db)
 
 
 def get_all_employees(db: Session) -> list[Type[Employee]]:
@@ -32,16 +32,16 @@ def update_employee(gpn: str, updated_data: employee_schema.EmployeeUpdateReques
     employee.gpn = updated_data.gpn
     employee.employee_name = updated_data.employee_name
     employee.team_id = updated_data.team_id
-    return employee_repo.update(db, employee)
+    return employee_repo.update(employee, db)
 
 
 def delete_employee(gpn: str, db: Session) -> None:
     employee = get_employee_by_gpn(gpn, db)
-    employee_repo.delete(db, employee)
+    employee_repo.delete(employee, db)
 
 
 def get_employee_by_gpn(gpn: str, db: Session) -> employee_models.Employee:
-    employee = employee_repo.get_by_field(db, "gpn", gpn)
+    employee = employee_repo.get_by_field("gpn", gpn, db)
     if not employee:
         logger.warning(f"Employee with GPN {gpn} not found")
         raise EmployeeNotFoundException(gpn)

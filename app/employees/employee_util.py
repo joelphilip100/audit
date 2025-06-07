@@ -5,7 +5,7 @@ from app.exceptions import EmployeeGpnExistsException
 
 
 def ensure_gpn_is_unique(gpn: str, db: Session) -> None:
-    employee = employee_repo.get_by_field(db, "gpn", gpn)
+    employee = employee_repo.get_by_field("gpn", gpn, db)
     if employee:
         logger.warning(f"Employee creation/update failed: GPN {gpn} already exists.")
         raise EmployeeGpnExistsException(gpn)

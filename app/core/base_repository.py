@@ -13,7 +13,7 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self.model = model
         self.id_field = id_field
 
-    def create(self, db: Session, obj_in: CreateSchemaType) -> ModelType:
+    def create(self, obj_in: CreateSchemaType, db: Session) -> ModelType:
         try:
             db.add(obj_in)
             db.commit()
@@ -26,17 +26,17 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def get_all(self, db: Session) -> List[ModelType]:
         return db.query(self.model).all()
 
-    def get_by_field(self, db: Session, field_name: str, id_: str) -> ModelType | None:
+    def get_by_field(self, field_name: str, id_: str, db: Session) -> ModelType | None:
         if not hasattr(self.model, field_name):
             raise AttributeError(f"{self.model.__name__} has no field '{field_name}'")
         field = getattr(self.model, field_name)
         return db.query(self.model).filter(field == id_).first()
 
-    def delete(self, db: Session, db_obj: ModelType) -> None:
+    def delete(self, db_obj: ModelType, db: Session) -> None:
         db.delete(db_obj)
         db.commit()
 
-    def update(self, db: Session, db_obj: UpdateSchemaType) -> ModelType:
+    def update(self, db_obj: UpdateSchemaType, db: Session) -> ModelType:
         db.commit()
         db.refresh(db_obj)
         return db_obj
