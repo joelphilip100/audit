@@ -4,12 +4,13 @@ from sqlalchemy.orm import Session
 from app.teams import models as team_models
 from app.teams import repository
 from app.loggers import logger
-from app.exceptions import TeamNameExistsException, TeamNotFoundException
+from app.exceptions import TeamNotFoundException
 from app.teams.models import Team
+from app.teams import team_util
 
 
 def create_team(team_name: str, db: Session) -> team_models.Team:
-    ensure_team_name_is_unique(team_name, db)
+    team_util.ensure_team_name_is_unique(team_name, db)
     new_team = team_models.Team(team_name=team_name)
     return repository.create_team(new_team, db)
 
@@ -28,7 +29,7 @@ def get_team(team_id: int, db) -> team_models.Team:
 
 def update_team(team_id: int, team_name: str, db: Session) -> team_models.Team:
     team = get_team(team_id, db)
-    ensure_team_name_is_unique(team_name, db)
+    team_util.ensure_team_name_is_unique(team_name, db)
     team.team_name = team_name
     return repository.update_team_name(team, db)
 
@@ -36,11 +37,3 @@ def update_team(team_id: int, team_name: str, db: Session) -> team_models.Team:
 def delete_team(team_id: int, db: Session) -> None:
     team = get_team(team_id, db)
     repository.delete_team(team, db)
-
-
-# Helper: Check uniqueness by team name
-def ensure_team_name_is_unique(team_name: str, db: Session) -> None:
-    team = repository.get_team_by_name(team_name, db)
-    if team:
-        logger.warning(f"Duplicate team name: '{team_name}' already exists.")
-        raise TeamNameExistsException(team_name)

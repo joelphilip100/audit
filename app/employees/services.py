@@ -1,7 +1,8 @@
 from typing import Type
 
 from sqlalchemy.orm import Session
-from app.employees import models as employee_models, schemas as employee_schema, repository
+from app.employees import models as employee_models, schemas as employee_schema
+from app.employees.repository import employee_repo
 from app.employees.models import Employee
 from app.loggers import logger
 from app.exceptions import EmployeeNotFoundException
@@ -15,11 +16,11 @@ def create_employee(employee_request: employee_schema.EmployeeCreateRequest, db:
         employee_name=employee_request.employee_name,
         team_id=employee_request.team_id
     )
-    return repository.create_employee(new_employee, db)
+    return employee_repo.create(db, new_employee)
 
 
 def get_all_employees(db: Session) -> list[Type[Employee]]:
-    return repository.get_all_employees(db)
+    return employee_repo.get_all(db)
 
 
 def update_employee(gpn: str, updated_data: employee_schema.EmployeeUpdateRequest,
@@ -31,16 +32,16 @@ def update_employee(gpn: str, updated_data: employee_schema.EmployeeUpdateReques
     employee.gpn = updated_data.gpn
     employee.employee_name = updated_data.employee_name
     employee.team_id = updated_data.team_id
-    return repository.update_employee(employee, db)
+    return employee_repo.update(db, employee)
 
 
 def delete_employee(gpn: str, db: Session) -> None:
     employee = get_employee_by_gpn(gpn, db)
-    repository.delete_employee(employee, db)
+    employee_repo.delete(db, employee)
 
 
 def get_employee_by_gpn(gpn: str, db: Session) -> employee_models.Employee:
-    employee = repository.get_employee_by_gpn(gpn, db)
+    employee = employee_repo.get_by_field(db, "gpn", gpn)
     if not employee:
         logger.warning(f"Employee with GPN {gpn} not found")
         raise EmployeeNotFoundException(gpn)

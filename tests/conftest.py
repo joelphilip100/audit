@@ -6,8 +6,10 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 from sqlalchemy import create_engine, event
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
+
+from unittest.mock import MagicMock
 
 from app.database import Base
 from app.dependencies import get_db
@@ -91,3 +93,8 @@ def client(test_db):
     finally:
         # Clean up dependency overrides
         app.dependency_overrides.clear()
+
+
+@pytest.fixture()
+def fake_db():
+    return MagicMock(spec=Session)

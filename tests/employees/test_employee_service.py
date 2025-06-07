@@ -4,18 +4,20 @@ from sqlalchemy.exc import IntegrityError
 
 from app.employees import services as employee_services
 from app.employees import schemas as employee_schema
-from app.exceptions import EmployeeGpnExistsException, TeamNotFoundException, EmployeeNotFoundException
+from app.exceptions import EmployeeGpnExistsException, EmployeeNotFoundException
 
 from tests.employees import employee_helper
 
 SCHEMAS = [employee_schema.EmployeeCreateRequest, employee_schema.EmployeeUpdateRequest]
 
 
+@pytest.mark.real_db
 def test_get_all_employees_empty(test_db):
     employees = employee_services.get_all_employees(test_db)
     assert len(employees) == 0
 
 
+@pytest.mark.real_db
 def test_create_employee(test_db):
     team = employee_helper.create_test_team("team_ces1", test_db)
     employee_request = employee_schema.EmployeeCreateRequest(
@@ -32,6 +34,7 @@ def test_create_employee(test_db):
     assert new_employee.team_name == team.team_name
 
 
+@pytest.mark.real_db
 def test_create_employee_without_team_name(test_db):
     employee_request = employee_schema.EmployeeCreateRequest(
         gpn="GPN_CES2",
@@ -45,6 +48,7 @@ def test_create_employee_without_team_name(test_db):
     assert new_employee.team_id is None
 
 
+@pytest.mark.real_db
 def test_create_employee_with_duplicate_gpn(test_db):
     gpn = "GPN_CES3"
     employee, team = employee_helper.create_test_employee(gpn, "Alice Smith", "team_ces3", test_db)
@@ -60,6 +64,7 @@ def test_create_employee_with_duplicate_gpn(test_db):
     assert f"GPN {gpn} already exists" in str(exc_info.value)
 
 
+@pytest.mark.real_db
 def test_create_employee_with_invalid_team_id(test_db):
     employee_request = employee_schema.EmployeeCreateRequest(
         gpn="GPN_CES4",
@@ -73,6 +78,7 @@ def test_create_employee_with_invalid_team_id(test_db):
     assert "FOREIGN KEY constraint failed" in str(exc_info.value)
 
 
+@pytest.mark.real_db
 def test_get_all_employees(test_db):
     employee_helper.create_test_employee("GPN_RES1", "Alice Smith", "TEAM_RES1", test_db)
     employee_helper.create_test_employee("GPN_RES2", "Bob Johnson", "TEAM_RES2", test_db)
@@ -85,6 +91,7 @@ def test_get_all_employees(test_db):
     assert any(employee.gpn == "GPN_RES3" for employee in employees)
 
 
+@pytest.mark.real_db
 def test_get_employee_by_gpn(test_db):
     created_employee, team = employee_helper.create_test_employee("GPN_RES4", "Alice Smith", "TEAM_RES4", test_db)
 
@@ -96,6 +103,7 @@ def test_get_employee_by_gpn(test_db):
     assert employee.team_name == team.team_name
 
 
+@pytest.mark.real_db
 def test_get_employee_by_gpn_not_found(test_db):
     gpn = "GPN_RES5"
 
@@ -105,6 +113,7 @@ def test_get_employee_by_gpn_not_found(test_db):
     assert f"Employee with GPN {gpn} not found" in str(exc_info.value)
 
 
+@pytest.mark.real_db
 def test_update_employee(test_db):
     gpn = "GPN_UES1"
     created_employee, team = employee_helper.create_test_employee(gpn, "Alice Smith", "TEAM_UES1", test_db)
@@ -121,6 +130,7 @@ def test_update_employee(test_db):
     assert updated_employee.team_id == team.team_id
 
 
+@pytest.mark.real_db
 def test_update_employee_no_changes(test_db):
     gpn = "GPN_UES2"
     created_employee, team = employee_helper.create_test_employee(gpn, "Alice Smith", "TEAM_UES2", test_db)
@@ -137,6 +147,7 @@ def test_update_employee_no_changes(test_db):
     assert updated_employee.team_id == team.team_id
 
 
+@pytest.mark.real_db
 def test_update_employee_with_gpn_not_found(test_db):
     invalid_gpn = "10000"
     team = employee_helper.create_test_team("TEAM_UES3", test_db)
@@ -153,6 +164,7 @@ def test_update_employee_with_gpn_not_found(test_db):
     assert f"Employee with GPN {invalid_gpn} not found" in str(exc_info.value)
 
 
+@pytest.mark.real_db
 def test_update_employee_with_different_gpn_valid(test_db):
     gpn = "GPN_UES4"
     created_employee, team = employee_helper.create_test_employee(gpn, "Alice Smith", "TEAM_UES4", test_db)
@@ -169,6 +181,7 @@ def test_update_employee_with_different_gpn_valid(test_db):
     assert updated_employee.team_id == team.team_id
 
 
+@pytest.mark.real_db
 def test_update_employee_with_existing_gpn(test_db):
     employee1, team1 = employee_helper.create_test_employee("GPN_UES5", "Alice Smith", "TEAM_UES5", test_db)
     employee2, team2 = employee_helper.create_test_employee("GPN_UES6", "George Smith", "TEAM_UES6", test_db)
@@ -187,6 +200,7 @@ def test_update_employee_with_existing_gpn(test_db):
     assert f"GPN {new_gpn_to_update} already exists" in str(exc_info.value)
 
 
+@pytest.mark.real_db
 def test_update_employee_with_invalid_team_name(test_db):
     gpn = "GPN_UES7"
     employee_helper.create_test_employee(gpn, "Alice Smith", "TEAM_UES7", test_db)
@@ -202,6 +216,7 @@ def test_update_employee_with_invalid_team_name(test_db):
     assert "FOREIGN KEY constraint failed" in str(exc_info.value)
 
 
+@pytest.mark.real_db
 def test_update_employee_with_team_name_none(test_db):
     gpn = "GPN_UES8"
     employee_helper.create_test_employee(gpn, "Alice Smith", "TEAM_UES8", test_db)
@@ -217,6 +232,7 @@ def test_update_employee_with_team_name_none(test_db):
     assert updated_employee.team_id is None
 
 
+@pytest.mark.real_db
 def test_delete_employee(test_db):
     gpn = "GPN_DES1"
     employee_helper.create_test_employee(gpn, "Alice Smith", "TEAM_DES1", test_db)
@@ -227,6 +243,7 @@ def test_delete_employee(test_db):
     assert not any(employee.gpn == gpn for employee in employees)
 
 
+@pytest.mark.real_db
 def test_delete_employee_not_found(test_db):
     gpn = "GPN_DES2"
 
@@ -236,6 +253,7 @@ def test_delete_employee_not_found(test_db):
     assert f"Employee with GPN {gpn} not found" in str(exc_info.value)
 
 
+@pytest.mark.real_db
 def test_recreate_employee_after_deletion(test_db):
     gpn = "GPN_DES3"
     team_name = "TEAM_DES3"
@@ -252,6 +270,7 @@ def test_recreate_employee_after_deletion(test_db):
 
 
 # Schema tests
+@pytest.mark.real_db
 @pytest.mark.parametrize("schemas", SCHEMAS)
 def test_gpn_is_converted_to_uppercase(schemas):
     request = schemas(
@@ -263,6 +282,7 @@ def test_gpn_is_converted_to_uppercase(schemas):
     assert request.gpn == "GPN123"
 
 
+@pytest.mark.real_db
 @pytest.mark.parametrize("schemas", SCHEMAS)
 def test_employee_name_title_case_conversion(schemas):
     request = schemas(
@@ -274,6 +294,7 @@ def test_employee_name_title_case_conversion(schemas):
     assert request.employee_name == "Alice Smith"
 
 
+@pytest.mark.real_db
 @pytest.mark.parametrize(
     "field_name, data, expected_message",
     [
@@ -292,6 +313,7 @@ def test_create_request_without_fields(field_name, data, expected_message):
     assert expected_message in str(exc_info.value)
 
 
+@pytest.mark.real_db
 @pytest.mark.parametrize(
     "field_name, data, expected_message",
     [
@@ -310,6 +332,7 @@ def test_create_request_without_fields(field_name, data, expected_message):
     assert expected_message in str(exc_info.value)
 
 
+@pytest.mark.real_db
 @pytest.mark.parametrize("schemas", SCHEMAS)
 @pytest.mark.parametrize(
     "field_name, data, expected_message",
@@ -327,6 +350,7 @@ def test_create_update_request_field_length_validation(schemas, field_name, data
     assert expected_message in str(exc_info.value)
 
 
+@pytest.mark.real_db
 @pytest.mark.parametrize("schemas", SCHEMAS)
 @pytest.mark.parametrize(
     "gpn_input, employee_name_input, expected_gpn, expected_name",
