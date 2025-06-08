@@ -29,11 +29,11 @@ def get_team(team_id: int, db: Session) -> team_models.Team:
 
 def update_team(team_id: int, team_name: str, db: Session) -> team_models.Team:
     team = get_team(team_id, db)
-    team_util.ensure_team_name_is_unique(team_name, db)
+    team_util.ensure_team_name_is_unique(team_name, db, team.team_id)
     team.team_name = team_name
-    return team_repo.update(db, team)
+    return team_repo.update(team, db)
 
 
 def delete_team(team_id: int, db: Session) -> None:
     team = get_team(team_id, db)
-    team_repo.delete(db, team)
+    team_repo.delete(team, db)
