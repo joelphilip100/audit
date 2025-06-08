@@ -1,4 +1,4 @@
-from typing import TypeVar, Generic, Type, List
+from typing import TypeVar, Generic, Type, List, Any
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from sqlalchemy.exc import IntegrityError
@@ -26,7 +26,7 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def get_all(self, db: Session) -> List[ModelType]:
         return db.query(self.model).all()
 
-    def get_by_field(self, field_name: str, id_: str, db: Session) -> ModelType | None:
+    def get_by_field(self, field_name: str, id_: str | int, db: Session) -> ModelType | None:
         if not hasattr(self.model, field_name):
             raise AttributeError(f"{self.model.__name__} has no field '{field_name}'")
         field = getattr(self.model, field_name)
